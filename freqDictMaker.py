@@ -17,12 +17,13 @@ def extractFreq(s):
 
 def createFreqFile(fileName, data):
     with open(fileName, 'w', encoding='utf-8') as f:
-        json.dump(data, f)
+        json.dump(data, f, ensure_ascii=False)
 
 def zipFiles(fileName, files):
     with ZipFile(fileName, 'w') as zip:
         for file in files:
-            zip.write(file)
+            zip.write(file, arcname = os.path.basename(file))
+            print('added ' + os.path.basename(file))
 
 def createFreqDict(path):
     tempFolder = os.path.join(tempfile.gettempdir(),'dictCreation')
@@ -52,18 +53,27 @@ def createFreqDict(path):
                 terms = json.load(f)
             assert len(terms) > 0, 'no terms found'
             for t in terms:
-                freq = extractFreq(t[6])
+                freq = extractFreq(t[5][0])
                 newTerms.append([t[0],'freq',freq])
-        fileName = 'term_meta_bank_'+ str(len(files)+1)
-        fileName = os.path.join(tempFolder,fileName)
-        createFreqFile(fileName,newTerms)
-        files.append(fileName)
+            fileName = 'term_meta_bank_'+ str(len(files)) + '.json'
+            fileName = os.path.join(tempFolder,fileName)
+            createFreqFile(fileName,newTerms)
+            files.append(fileName)
 
-    zipFiles('freq-'+dictData['title'], files)
+    zipName = 'freq-'+dictData['title']+'.zip'
+    try:
+        os.remove(zipName)
+    except FileNotFoundError:
+        print("")
+    zipFiles(zipName, files)
     shutil.rmtree(tempFolder)
+    print('finished!')
 
 def main():
     for root, _, files in os.walk('.'):
         for file in files:
-            if '.zip' in file:
+            if '.zip' in file and 'freq' not in file:
                 createFreqDict(os.path.join(root,file))
+
+if __name__ == "__main__":
+    main()
