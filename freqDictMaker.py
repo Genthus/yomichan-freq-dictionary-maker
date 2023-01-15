@@ -5,6 +5,7 @@ import shutil
 import re
 from zipfile import ZipFile
 
+# Change this function to suit the way the dictionary logs its frequency
 def extractFreq(s):
     temp = re.findall(r'\[(.*?)\]', s)
     freqString = temp[0]
@@ -53,7 +54,7 @@ def createFreqDict(path):
                 terms = json.load(f)
             assert len(terms) > 0, 'no terms found'
             for t in terms:
-                freq = extractFreq(t[5][0])
+                freq = extractFreq(t[5][0]) # change this to the field where the frequency is
                 newTerms.append([t[0],'freq',freq])
             fileName = 'term_meta_bank_'+ str(len(files)) + '.json'
             fileName = os.path.join(tempFolder,fileName)
